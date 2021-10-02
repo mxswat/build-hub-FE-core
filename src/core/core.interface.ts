@@ -39,8 +39,9 @@ export interface Property {
   id: string
   max: number
   min: number
-  filters: string[]
-  tags: string[]
+  slot_filters: string[] | undefined 
+  filters: string[] | undefined
+  tags: string[] | undefined
 }
 
 

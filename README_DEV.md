@@ -1,0 +1,1 @@
+How to test the nodemodule localy https://flaviocopes.com/npm-local-package/
