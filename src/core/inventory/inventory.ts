@@ -26,16 +26,16 @@ export class InventorySlot {
   private properties: Dictionary<SlotProperty[]> = {}
   private propertiesDefault: Dictionary<any[]> = {}
   private item: any
-  private slotId: string
+  private id: string
   constructor(slot: PlayerInventoryItem, id: string) {
-    this.slotId = id
+    this.id = id
     for (const iterator of slot.properties) {
       this.properties[iterator] = []
       this.propertiesDefault[iterator] = []
     }
   }
 
-  public getAvailableItems(filter = (item: Item) => item.slots.includes(this.slotId)) {
+  public getAvailableItems(filter = (item: Item) => item.slots.includes(this.id)) {
     // Use default filter or custom one
     return Inventory.items.filter(filter)
   }
@@ -51,7 +51,7 @@ export class InventorySlot {
       // Mx TODO yes, this fucking sucks it should be a tuple like [key, value] but who cares right now, right? right? pls send help
       const key = Object.keys(element)[0]
       if (this.properties[key]) {
-        this.properties[key].push(new SlotProperty(key, element[key], this.slotId))
+        this.properties[key].push(new SlotProperty(key, element[key], this.id))
       }
       // Sucks end
     }
@@ -61,7 +61,7 @@ export class InventorySlot {
 
   public getPropertyByIndex(key: string, index: number): SlotProperty {
     if (!(this.properties?.[key]?.[index] ?? false)) {
-      throw new Error(`there is no prop "${key}" at index "${index}" in the game_schema for the slot "${this.slotId}`);
+      throw new Error(`there is no prop "${key}" at index "${index}" in the game_schema for the slot "${this.id}`);
     }
     return this.properties[key][index]
   }
@@ -77,7 +77,7 @@ export class InventorySlot {
 
   public getPropertyArray(key: string): SlotProperty[] {
     if (!(this.properties?.[key] ?? false)) {
-      throw new Error(`there is no prop "${key}", is "${key}" in the game_schema for the slot "${this.slotId}"?`);
+      throw new Error(`there is no prop "${key}", is "${key}" in the game_schema for the slot "${this.id}"?`);
     }
     return this.properties[key]
   }
@@ -86,14 +86,14 @@ export class InventorySlot {
 class SlotProperty {
   // because typescript 2.7.2 included a strict class checking where all properties should be declared in constructor. So to work around that, just add a bang sign (!) like: name!:string;
   // https://github.com/Microsoft/TypeScript-Vue-Starter/issues/36#issuecomment-371434263
-  public readonly propId!: string
+  public readonly id!: string
   public readonly max!: number
   public readonly min!: number
   public readonly tags!: string[]
-  public readonly isLocked!: boolean
   public readonly value!: number
   private filterId: string
   private parentSlotId: string
+  private isLocked!: boolean
 
   constructor(filterId: string, propId: string, parentSlotId: string) {
     this.isLocked = !(propId === WILD_CARD)
@@ -103,7 +103,7 @@ class SlotProperty {
     if (propId !== WILD_CARD) {
       const property = Inventory.properties.find((x) => x.id === propId)
       if (property && property?.filters?.includes(filterId)) {
-        this.setProperty(property)
+        this.setPropertyInner(property)
       }
     }
   }
@@ -112,7 +112,7 @@ class SlotProperty {
     if (tags && tags.includes('is_hidden')) return false // Always exclude if hidden
     if (slot_filters && !slot_filters.includes(this.parentSlotId)) return false // Always exclude if does not match parent slot if defined
     if (filters && !filters.includes(this.filterId)) return false // Always exclude if does not match filterId if defined
-    return true
+    return true // Otherwise is valid
   }
 
   /**
@@ -122,23 +122,28 @@ class SlotProperty {
    */
   public getPossibleValues(overrideFilter?: (p: Property) => boolean): Property[] {
     if (this.isLocked) {
-      return [Inventory.properties.find((p) => p.id === this.propId) as Property]
+      return [Inventory.properties.find((p) => p.id === this.id) as Property]
     } else {
       const filter = overrideFilter ?? this.possibleValuesFilter.bind(this)
       return Inventory.properties.filter(filter)
     }
   }
 
-  public setProperty({id, max, min, tags}: Property) {
-    (this.propId as string) = id;
+  private setPropertyInner({id, max, min, tags}: Property) {
+    (this.id as string) = id;
     (this.max as number) = max;
     (this.min as number) = min;
     (this.tags as string[]) = tags ?? [];
     (this.value as number) = max;
   }
 
+  public changeProperty(property: Property) {
+    if (this.isLocked) throw new Error(`The property ${this.id} is locked and you cant replace it`);
+    this.setPropertyInner(property)
+  }
+
   public setValue(value: number): number {
-    if (this.propId === WILD_CARD) throw new Error("You can't assing a value to a wildcard");
+    if (this.id === WILD_CARD) throw new Error("You can't assing a value to a wildcard");
     // trick to set a readonly value from inside the class
     // https://github.com/microsoft/TypeScript/issues/37487#issuecomment-755645690
     (this.value as number) = value
