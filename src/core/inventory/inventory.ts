@@ -1,4 +1,4 @@
-import { Dictionary, Item, PlayerInventory, PlayerInventoryItem, Property, WILD_CARD } from "../core.interface";
+import { Dictionary, Item, PlayerInventory, InventorySlotSchema, Property, WILD_CARD } from "../core.interface";
 
 export class Inventory {
   public slots: Dictionary<InventorySlot> = {}
@@ -27,7 +27,7 @@ export class InventorySlot {
   private propertiesDefault: Dictionary<any[]> = {}
   private item: any
   private id: string
-  constructor(slot: PlayerInventoryItem, id: string) {
+  constructor(slot: InventorySlotSchema, id: string) {
     this.id = id
     for (const iterator of slot.properties) {
       this.properties[iterator] = []
@@ -59,7 +59,7 @@ export class InventorySlot {
     this.item = item
   }
 
-  public getPropertyByIndex(key: string, index: number): SlotProperty {
+  public getItemPropertyByIndex(key: string, index: number): SlotProperty {
     this.checkForitem()
     if (!(this.properties?.[key]?.[index] ?? false)) {
       throw new Error(`there is no prop "${key}" at index "${index}" in the game_schema for the slot "${this.id}`);
@@ -67,12 +67,12 @@ export class InventorySlot {
     return this.properties[key][index]
   }
 
-  public getPropertyFirst(key: string): SlotProperty {
+  public getItemPropertyFirst(key: string): SlotProperty {
     this.checkForitem()
-    return this.getPropertyByIndex(key, 0)
+    return this.getItemPropertyByIndex(key, 0)
   }
 
-  public getPropertyArray(key: string): SlotProperty[] {
+  public getItemPropertyArray(key: string): SlotProperty[] {
     this.checkForitem()
     if (!(this.properties?.[key] ?? false)) {
       throw new Error(`there is no prop "${key}", is "${key}" in the game_schema for the slot "${this.id}"?`);
@@ -96,6 +96,7 @@ class SlotProperty {
   private categoryId: string
   private slotId: string
   private isLocked!: boolean
+  // private isReadonly!: boolean
 
   constructor(categoryId: string, propertyId: string, parentSlotId: string) {
     this.isLocked = !(propertyId === WILD_CARD)
@@ -110,7 +111,9 @@ class SlotProperty {
       if (property && property?.category?.includes(categoryId)) {
         this.setPropertyInner(property)
       } else {
-        console.warn('There is no property found for this slot')
+        (this.value as any) = propertyId;
+        // There is no property found for this slot
+        // Assume is a readOnly value
       }
     }
   }

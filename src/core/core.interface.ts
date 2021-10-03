@@ -17,9 +17,9 @@ export interface Player {
   inventory: PlayerInventory
 }
 
-export interface PlayerInventory { [key: string]: PlayerInventoryItem }
+export interface PlayerInventory { [key: string]: InventorySlotSchema }
 
-export interface PlayerInventoryItem {
+export interface InventorySlotSchema {
   /**
    * Slot is unused right now, it could be used for recursive items, EG: A gun and it's attachment slots if they are nested, EG: a scope mount can add different scopes to the pool if items
    */
