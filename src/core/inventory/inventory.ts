@@ -60,26 +60,28 @@ export class InventorySlot {
   }
 
   public getPropertyByIndex(key: string, index: number): SlotProperty {
+    this.checkForitem()
     if (!(this.properties?.[key]?.[index] ?? false)) {
       throw new Error(`there is no prop "${key}" at index "${index}" in the game_schema for the slot "${this.id}`);
     }
     return this.properties[key][index]
   }
 
-  /**
-   * To use on 
-   * @param key 
-   * @returns 
-   */
   public getPropertyFirst(key: string): SlotProperty {
+    this.checkForitem()
     return this.getPropertyByIndex(key, 0)
   }
 
   public getPropertyArray(key: string): SlotProperty[] {
+    this.checkForitem()
     if (!(this.properties?.[key] ?? false)) {
       throw new Error(`there is no prop "${key}", is "${key}" in the game_schema for the slot "${this.id}"?`);
     }
     return this.properties[key]
+  }
+
+  private checkForitem() {
+    if (!this.item) throw new Error("this.item is not defined! You need to set it to something before editing the properties");
   }
 }
 
@@ -91,8 +93,8 @@ class SlotProperty {
   public readonly min!: number
   public readonly tags!: string[]
   public readonly value!: number
-  private filterId: string
-  private parentSlotId: string
+  private filterId: string // Rename to propertyKey
+  private parentSlotId: string // Rename to slotKey
   private isLocked!: boolean
 
   constructor(filterId: string, propId: string, parentSlotId: string) {
@@ -101,14 +103,19 @@ class SlotProperty {
     this.parentSlotId = parentSlotId
 
     if (propId !== WILD_CARD) {
-      const property = Inventory.properties.find((x) => x.id === propId)
+      const property = Inventory.properties.find(
+        (x) => x.id === propId 
+        && x.filters?.includes(filterId)
+      )
       if (property && property?.filters?.includes(filterId)) {
         this.setPropertyInner(property)
+      } else {
+        console.warn('There is no property found for this slot')
       }
     }
   }
 
-  private possibleValuesFilter({tags, slot_filters, filters}: Property): boolean {
+  private possibleValuesFilter({ tags, slot_filters, filters }: Property): boolean {
     if (tags && tags.includes('is_hidden')) return false // Always exclude if hidden
     if (slot_filters && !slot_filters.includes(this.parentSlotId)) return false // Always exclude if does not match parent slot if defined
     if (filters && !filters.includes(this.filterId)) return false // Always exclude if does not match filterId if defined
@@ -129,7 +136,7 @@ class SlotProperty {
     }
   }
 
-  private setPropertyInner({id, max, min, tags}: Property) {
+  private setPropertyInner({ id, max, min, tags }: Property) {
     (this.id as string) = id;
     (this.max as number) = max;
     (this.min as number) = min;
