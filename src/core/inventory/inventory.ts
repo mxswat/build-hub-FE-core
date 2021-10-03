@@ -93,21 +93,21 @@ class SlotProperty {
   public readonly min!: number
   public readonly tags!: string[]
   public readonly value!: number
-  private filterId: string // Rename to propertyKey
-  private parentSlotId: string // Rename to slotKey
+  private categoryId: string
+  private slotId: string
   private isLocked!: boolean
 
-  constructor(filterId: string, propId: string, parentSlotId: string) {
-    this.isLocked = !(propId === WILD_CARD)
-    this.filterId = filterId
-    this.parentSlotId = parentSlotId
+  constructor(categoryId: string, propertyId: string, parentSlotId: string) {
+    this.isLocked = !(propertyId === WILD_CARD)
+    this.categoryId = categoryId
+    this.slotId = parentSlotId
 
-    if (propId !== WILD_CARD) {
+    if (propertyId !== WILD_CARD) {
       const property = Inventory.properties.find(
-        (x) => x.id === propId 
-        && x.filters?.includes(filterId)
+        (x) => x.id === propertyId 
+        && x.category?.includes(categoryId)
       )
-      if (property && property?.filters?.includes(filterId)) {
+      if (property && property?.category?.includes(categoryId)) {
         this.setPropertyInner(property)
       } else {
         console.warn('There is no property found for this slot')
@@ -115,11 +115,11 @@ class SlotProperty {
     }
   }
 
-  private possibleValuesFilter({ tags, slot_filters, filters }: Property): boolean {
+  private possibleValuesFilter({ tags, slot_filters, category }: Property): boolean {
     if (tags && tags.includes('is_hidden')) return false // Always exclude if hidden
-    if (slot_filters && !slot_filters.includes(this.parentSlotId)) return false // Always exclude if does not match parent slot if defined
-    if (filters && !filters.includes(this.filterId)) return false // Always exclude if does not match filterId if defined
-    return true // Otherwise is valid
+    if (slot_filters && !slot_filters.includes(this.slotId)) return false 
+    if (category && !category.includes(this.categoryId)) return false 
+    return true 
   }
 
   /**
@@ -145,7 +145,7 @@ class SlotProperty {
   }
 
   public changeProperty(property: Property) {
-    if (this.isLocked) throw new Error(`The property ${this.id} is locked and you cant replace it`);
+    if (this.isLocked) throw new Error(`The property ${this.id} in slot ${this.slotId} is locked and you cant replace it`);
     this.setPropertyInner(property)
   }
 

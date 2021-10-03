@@ -40,7 +40,7 @@ export interface Property {
   max: number
   min: number
   slot_filters: string[] | undefined 
-  filters: string[] | undefined
+  category: string[] | undefined
   tags: string[] | undefined
 }
 
