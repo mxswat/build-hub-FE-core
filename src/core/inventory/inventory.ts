@@ -27,6 +27,7 @@ export class InventorySlot {
   private propertiesDefault: Dictionary<any[]> = {}
   private item: any
   private id: string
+
   constructor(slot: InventorySlotSchema, id: string) {
     this.id = id
     for (const iterator of slot.properties) {
@@ -55,7 +56,6 @@ export class InventorySlot {
       }
       // Sucks end
     }
-    // TODO: Set item default prop if there is any :)
     this.item = item
   }
 
