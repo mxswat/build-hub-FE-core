@@ -1,1 +1,0 @@
-export { BHCore } from './core';

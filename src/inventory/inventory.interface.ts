@@ -1,21 +1,6 @@
 export interface Dictionary<T = any> { [key: string]: T }
 
 export const WILD_CARD = "*"
-export interface BHCoreOptions {
-  readonly items: Item[]
-  readonly properties: Property[]
-  
-  // readonly weapons: any
-  readonly schema: {
-    schemaVersion: string
-    gameName: string
-    player: Player
-  }
-}
-
-export interface Player {
-  inventory: PlayerInventory
-}
 
 export interface PlayerInventory { [key: string]: InventorySlotSchema }
 
@@ -29,19 +14,19 @@ export interface InventorySlotSchema {
 
 export interface Item {
   id: string
-  set: string
-  slots: string[]
-  properties: Dictionary[]
-  tags: { [key: string]: boolean | string }[]
+  set?: string
+  slots?: string[]
+  properties?: Dictionary[]
+  tags?: string[]
 }
 
 export interface Property {
   id: string
-  max: number
-  min: number
-  slot_filters: string[] | undefined 
-  category: string[] | undefined
-  tags: string[] | undefined
+  max?: number
+  min?: number
+  slot_filters?: string[] 
+  category?: string[]
+  tags?: string[]
 }
 
 

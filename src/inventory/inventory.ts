@@ -1,4 +1,4 @@
-import { Dictionary, Item, PlayerInventory, InventorySlotSchema, Property, WILD_CARD } from "../core.interface";
+import { Dictionary, Item, PlayerInventory, InventorySlotSchema, Property, WILD_CARD } from "./inventory.interface";
 
 export class Inventory {
   public slots: Dictionary<InventorySlot> = {}
@@ -36,7 +36,7 @@ export class InventorySlot {
     }
   }
 
-  public getAvailableItems(filter = (item: Item) => item.slots.includes(this.id)) {
+  public getAvailableItems(filter = (item: Item) => (item.slots || []).includes(this.id)) {
     // Use default filter or custom one
     return Inventory.items.filter(filter)
   }
@@ -47,8 +47,9 @@ export class InventorySlot {
 
   public setItem(item: Item) {
     this.properties = this.propertiesDefault
-    for (let i = 0; i < item.properties.length; i++) {
-      const element = item.properties[i];
+    const properties = item.properties || []
+    for (let i = 0; i < properties.length; i++) {
+      const element = properties[i];
       // Mx TODO yes, this fucking sucks it should be a tuple like [key, value] but who cares right now, right? right? pls send help
       const key = Object.keys(element)[0]
       if (this.properties[key]) {
@@ -141,10 +142,10 @@ class SlotProperty {
 
   private setPropertyInner({ id, max, min, tags }: Property) {
     (this.id as string) = id;
-    (this.max as number) = max;
-    (this.min as number) = min;
+    (this.max as number) = max as unknown as number;
+    (this.min as number) = min as unknown as number;
     (this.tags as string[]) = tags ?? [];
-    (this.value as number) = max;
+    (this.value as number) = max as unknown as number;
   }
 
   public changeProperty(property: Property) {
