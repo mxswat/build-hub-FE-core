@@ -1,10 +1,17 @@
-import { Dictionary, Item, PlayerInventory, InventorySlotSchema, Property, WILD_CARD } from "./inventory.interface";
+import {
+  Dictionary,
+  Item,
+  PlayerInventory,
+  InventorySlotSchema,
+  Property,
+  WILD_CARD,
+} from "./inventory.interface";
 
-export class Inventory {
-  public slots: Dictionary<InventorySlot> = {}
+export class Inventory<SlotKeys extends string> {
+  public readonly slots: Record<SlotKeys, InventorySlot> = {} as any
   public static items: Item[] = []
   public static properties: Property[] = []
-  constructor(inventory: PlayerInventory, items: Item[], properties: Property[]) {
+  constructor(inventory: PlayerInventory<SlotKeys>, items: Item[], properties: Property[]) {
     Inventory.items = items
     Inventory.properties = properties
     for (const slotID in inventory) {
@@ -12,13 +19,6 @@ export class Inventory {
         this.slots[slotID] = new InventorySlot(inventory[slotID], slotID);
       }
     }
-  }
-
-  /**
-   * getSlots
-   */
-  public getSlots(): Dictionary<InventorySlot> {
-    return this.slots
   }
 }
 
@@ -106,8 +106,8 @@ class SlotProperty {
 
     if (propertyId !== WILD_CARD) {
       const property = Inventory.properties.find(
-        (x) => x.id === propertyId 
-        && x.category?.includes(categoryId)
+        (x) => x.id === propertyId
+          && x.category?.includes(categoryId)
       )
       if (property && property?.category?.includes(categoryId)) {
         this.setPropertyInner(property)
@@ -121,9 +121,9 @@ class SlotProperty {
 
   private possibleValuesFilter({ tags, slot_filters, category }: Property): boolean {
     if (tags && tags.includes('is_hidden')) return false // Always exclude if hidden
-    if (slot_filters && !slot_filters.includes(this.slotId)) return false 
-    if (category && !category.includes(this.categoryId)) return false 
-    return true 
+    if (slot_filters && !slot_filters.includes(this.slotId)) return false
+    if (category && !category.includes(this.categoryId)) return false
+    return true
   }
 
   /**

@@ -2,7 +2,10 @@ export interface Dictionary<T = any> { [key: string]: T }
 
 export const WILD_CARD = "*"
 
-export interface PlayerInventory { [key: string]: InventorySlotSchema }
+// For test purpose
+export type DefaultSlotKeys = 'Something0' | 'Something1'
+
+export type PlayerInventory<T extends string> = Record<T, InventorySlotSchema>
 
 export interface InventorySlotSchema {
   /**
@@ -24,7 +27,7 @@ export interface Property {
   id: string
   max?: number
   min?: number
-  slot_filters?: string[] 
+  slot_filters?: string[]
   category?: string[]
   tags?: string[]
 }
