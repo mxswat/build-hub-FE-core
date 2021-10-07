@@ -32,5 +32,9 @@ export interface Property {
   tags?: string[]
 }
 
+export interface Set {
+  id: string;
+  tiers: string[]
+}
 
 // Everything is read only cause I can't allow myselft to fuck up with the references and memory like the previous project

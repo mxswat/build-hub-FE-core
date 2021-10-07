@@ -1,22 +1,35 @@
 import {
   Dictionary,
+  InventorySlotSchema,
   Item,
   PlayerInventory,
-  InventorySlotSchema,
   Property,
+  Set,
   WILD_CARD,
 } from "./inventory.interface";
 
 export class Inventory<SlotKeys extends string> {
   public readonly slots: Record<SlotKeys, InventorySlot> = {} as any
-  public static items: Item[] = []
-  public static properties: Property[] = []
-  constructor(inventory: PlayerInventory<SlotKeys>, items: Item[], properties: Property[]) {
-    Inventory.items = items
-    Inventory.properties = properties
+  public static readonly items: Item[]
+  public static readonly properties: Property[]
+  public static readonly sets: Set[]
+  constructor(inventory: PlayerInventory<SlotKeys>, items: Item[], properties: Property[], sets: Set[]) {
+    (Inventory.items as Item[]) = items;
+    (Inventory.properties as Property[]) = properties;
+    (Inventory.sets as Set[]) = sets;
+
     for (const slotID in inventory) {
       if (Object.prototype.hasOwnProperty.call(inventory, slotID)) {
         this.slots[slotID] = new InventorySlot(inventory[slotID], slotID);
+      }
+    }
+  }
+
+  public getCombinedProperties(slots: SlotKeys[]) {
+    for (let i = 0; i < slots.length; i++) {
+      const slotId = slots[i];
+      if (this.slots[slotId].hasItem()) {
+        
       }
     }
   }
@@ -36,9 +49,17 @@ export class InventorySlot {
     }
   }
 
+  private checkForitem() {
+    if (!this.item) throw new Error("this.item is not defined! You need to set it to something before editing the properties");
+  }
+
   public getAvailableItems(filter = (item: Item) => (item.slots || []).includes(this.id)) {
     // Use default filter or custom one
     return Inventory.items.filter(filter)
+  }
+
+  public hasItem() {
+    return !!this.item 
   }
 
   public getItem() {
@@ -81,8 +102,8 @@ export class InventorySlot {
     return this.properties[key]
   }
 
-  private checkForitem() {
-    if (!this.item) throw new Error("this.item is not defined! You need to set it to something before editing the properties");
+  public getAllProperties() {
+    return this.properties
   }
 }
 
