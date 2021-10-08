@@ -1,3 +1,11 @@
+/*!
+ * BuildHub Front-end Core v0.1.0
+ * https://github.com/mxswat/build-hub-FE-core
+ *
+ *
+ * Copyright (C) 2021 - A project by Massimo Cacciapaglia
+ */
+
 import {
   Dictionary,
   InventorySlotSchema,
@@ -25,13 +33,29 @@ export class Inventory<SlotKeys extends string> {
     }
   }
 
-  public getCombinedProperties(slots: SlotKeys[]) {
+  public getCombinedProperties(slots: SlotKeys[], categories: string[]) {
+    const properties: SlotProperty[] = []
     for (let i = 0; i < slots.length; i++) {
-      const slotId = slots[i];
-      if (this.slots[slotId].hasItem()) {
-        
+      const slot = this.slots[slots[i]];
+      if (slot.hasItem()) {
+        const props = slot.getAllProperties()
+        for (let j = 0; j < categories.length; j++) {
+          const _propertiees = props[categories[j]];
+          properties.push(..._propertiees)
+        }
       }
     }
+
+    const combinedProperties: Dictionary<number> = {}
+    for (let i = 0; i < properties.length; i++) {
+      const element = properties[i];
+      if (element.hasPropertySet()) {
+        combinedProperties[element.id] = combinedProperties[element.id] ?? 0
+        combinedProperties[element.id] += element.value
+      }
+    }
+
+    return combinedProperties
   }
 }
 
@@ -59,7 +83,7 @@ export class InventorySlot {
   }
 
   public hasItem() {
-    return !!this.item 
+    return !!this.item
   }
 
   public getItem() {
@@ -166,7 +190,9 @@ class SlotProperty {
     (this.max as number) = max as unknown as number;
     (this.min as number) = min as unknown as number;
     (this.tags as string[]) = tags ?? [];
-    (this.value as number) = max as unknown as number;
+    (this.value as number) = max ?? false
+      ? (max as number)
+      : (1); // If it's not defined I can assume it's a boolean, like a talent in TD2 
   }
 
   public changeProperty(property: Property) {
@@ -175,10 +201,14 @@ class SlotProperty {
   }
 
   public setValue(value: number): number {
-    if (this.id === WILD_CARD) throw new Error("You can't assing a value to a wildcard");
+    if (this.id === WILD_CARD) throw new Error("You can't assing a value while the property ID is a wild card(*)");
     // trick to set a readonly value from inside the class
     // https://github.com/microsoft/TypeScript/issues/37487#issuecomment-755645690
     (this.value as number) = value
     return value
+  }
+
+  public hasPropertySet() {
+    return this.id && this.id !== WILD_CARD
   }
 }

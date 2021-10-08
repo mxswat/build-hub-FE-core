@@ -1,3 +1,11 @@
+/*!
+ * BuildHub Front-end Core v0.1.0
+ * https://github.com/mxswat/build-hub-FE-core
+ *
+ *
+ * Copyright (C) 2021 - A project by Massimo Cacciapaglia
+ */
+
 export interface Dictionary<T = any> { [key: string]: T }
 
 export const WILD_CARD = "*"
@@ -34,7 +42,7 @@ export interface Property {
 
 export interface Set {
   id: string;
-  tiers: string[]
+  tiers: Dictionary<number | boolean>[]
 }
 
 // Everything is read only cause I can't allow myselft to fuck up with the references and memory like the previous project
