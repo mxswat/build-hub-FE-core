@@ -6,7 +6,7 @@
  * Copyright (C) 2021 - A project by Massimo Cacciapaglia
  */
 
-export { Inventory } from "./inventory/inventory"
+export { Inventory, InventorySlot, SlotProperty } from "./inventory/inventory"
 
 export {
   Dictionary,

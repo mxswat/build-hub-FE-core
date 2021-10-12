@@ -16,6 +16,8 @@ import {
   WILD_CARD,
 } from "./inventory.interface";
 
+import clonedeep from "lodash.clonedeep";
+
 export class Inventory<SlotKeys extends string> {
   public readonly slots: Record<SlotKeys, InventorySlot> = {} as any
   public static readonly items: Item[]
@@ -91,7 +93,7 @@ export class InventorySlot {
   }
 
   public setItem(item: Item) {
-    this.properties = this.propertiesDefault
+    this.properties = clonedeep(this.propertiesDefault)
     const properties = item.properties || []
     for (let i = 0; i < properties.length; i++) {
       const element = properties[i];
@@ -131,7 +133,7 @@ export class InventorySlot {
   }
 }
 
-class SlotProperty {
+export class SlotProperty {
   // because typescript 2.7.2 included a strict class checking where all properties should be declared in constructor. So to work around that, just add a bang sign (!) like: name!:string;
   // https://github.com/Microsoft/TypeScript-Vue-Starter/issues/36#issuecomment-371434263
   public readonly id!: string
